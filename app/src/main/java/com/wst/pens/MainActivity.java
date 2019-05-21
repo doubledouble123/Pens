@@ -7,14 +7,17 @@ package com.wst.pens;
  */
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioGroup;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     StrokesView strokesView;
     private Button reDo;
     private Button unDo;
     private Button recover;
+    private RadioGroup pen_type;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,9 +26,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recover = (Button)findViewById(R.id.recover);
         unDo = (Button)findViewById(R.id.undo);
         reDo = (Button)findViewById(R.id.redo);
+        pen_type = (RadioGroup)findViewById(R.id.pen_type);
         recover.setOnClickListener(this);
         unDo.setOnClickListener(this);
         reDo.setOnClickListener(this);
+        pen_type.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.pen:
+                        strokesView.setPenType(PenType.PEN);
+                        break;
+                    case R.id.brush_pen:
+                        strokesView.setPenType(PenType.BRUSH);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
 
     }
     @Override

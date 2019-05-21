@@ -535,4 +535,152 @@ public class SplineCurveStrategy {
             drawingStrokes.state = currentState;
         }
     }
+    /*
+   * 毛笔*/
+    public void drawBrushPen(DrawingStrokes drawingStrokes) {
+        // if(drawingStrokes.debug)
+        int[] colors = new int[] {
+                Color.parseColor("#66111111"),
+                Color.parseColor("#77111111"),
+                Color.parseColor("#88111111")};
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setStrokeWidth(1f);
+        blurryPaint.setStrokeWidth(1f);
+        blurryPaint.setColor(Color.RED);
+        //blurryPaint.setColor(drawingStrokes.context.getResources().getColor(R.color.pencil_nine));
+        //  blurryPaint.setPathEffect(new DashPathEffect(new float[] {1f, 1f}, 0));
+        blurryPaint.setStyle(Paint.Style.STROKE);
+        //blurryPaint.setAlpha(100);
+        //mPaint.setAlpha(250);
+        // mPaint.setAntiAlias(false);
+//        mPaint.setPathEffect(new DashPathEffect(new float[] {2f, 2f}, 0));
+        //mPaint.setPathEffect(new DiscretePathEffect(3.0f, 5.0f));
+        //mPaint.setPathEffect(new CornerPathEffect(10));
+        //  mPaint.setColor(drawingStrokes.context.getResources().getColor(R.color.pencil_two));
+        mPaint.setColor(Color.parseColor("#111111"));
+        //获得笔在两点间不同宽度的差值
+        int drawSteps = (int) Math.floor(splineCurve.length());
+        if (drawingStrokes.isUp) {
+            //curveIndex = 1;
+            if (drawSteps > 2)
+                curveIndex = (drawSteps - 2) / 2;
+            else curveIndex = 1;
+            if (curveIndex < 1) curveIndex = 1;
+            if (drawSteps == 0) drawSteps = 2;
+        } else if (drawingStrokes.isDown) {
+            curveIndex = 1;
+            if (drawSteps == 0) drawSteps = 2;
+        } else {
+            if (drawSteps > 100) curveIndex = 40;
+            else if (drawSteps > 80) curveIndex = 35;
+            else if (drawSteps > 70) curveIndex = 30;
+            else if (drawSteps > 60) curveIndex = 25;
+            else if (drawSteps > 50) curveIndex = 20;
+            else if (drawSteps > 40) curveIndex = 15;
+            else if (drawSteps > 30) curveIndex = 13;
+            else if (drawSteps > 20) curveIndex = 9;
+            else if (drawSteps > 10) curveIndex = 7;
+            else if (drawSteps >= 4) curveIndex = 3;
+            else curveIndex = 1;
+        }
+        float widthDelta = endWidth - startWidth;
+        //两点间实际轨迹距离
+        if (drawSteps == 0) {
+            drawSteps = 1;
+        }
+        Log.i("endWidth", " " + endWidth);
+//        curveIndex = drawSteps/2;
+//        if(curveIndex==0) curveIndex=1;
+        for (float i = 0, num = 1; i < drawSteps; i += 0.5f, num++) {
+            mPath.reset();
+            float t = (float) (i) / drawSteps;
+            float tt = t * t;
+            float ttt = tt * t;
+            float u = 1 - t;
+            float uu = u * u;
+            float uuu = uu * u;
+            float x = uuu * splineCurve.point1.x / 6.0f;
+            x += (3 * ttt - 6 * tt + 4) * splineCurve.point2.x / 6.0f;
+            x += (-3 * ttt + 3 * tt + 3 * t + 1) * splineCurve.point3.x / 6.0f;
+            x += ttt * splineCurve.point4.x / 6.0f;
+            float y = uuu * splineCurve.point1.y / 6.0f;
+            y += (3 * ttt - 6 * tt + 4) * splineCurve.point2.y / 6.0f;
+            y += (-3 * ttt + 3 * tt + 3 * t + 1) * splineCurve.point3.y / 6.0f;
+            y += ttt * splineCurve.point4.y / 6.0f;
+            float currentWidth = startWidth + t * widthDelta;
+//            if (!drawingStrokes.isUp)
+//                if (Math.abs(t * widthDelta) > 0.4f * num) {
+//                    if (t * widthDelta > 0)
+//                        currentWidth = startWidth + 0.4f * num;
+//                    else currentWidth = startWidth - 0.4f * num;
+//                }
+            //  mPaint.setMaskFilter(new BlurMaskFilter(currentWidth, BlurMaskFilter.Blur.SOLID));
+            // mPaint.setShadowLayer(currentWidth / 2, 0, 0, drawingStrokes.context.getResources().getColor(R.color.pencil_nine));
+            if (drawingStrokes.isDown) {
+//                canvas.drawLine(drawingStrokes.mLastX + currentWidth / 2, drawingStrokes.mLastY - currentWidth / 2, x + currentWidth / 2, y - currentWidth/ 2, blurryPaint);
+//                mPaint.setStrokeWidth(1f);
+//                mPaint.setColor(drawingStrokes.context.getResources().getColor(R.color.pencil_two));
+                //canvas.drawOval(new RectF(x - currentWidth / 2, y - currentWidth / 2, x + currentWidth / 2, y + currentWidth / 2), blurryPaint);
+                canvas.drawOval(new RectF(x - currentWidth / 2, y - currentWidth / 2, x + currentWidth / 2, y + currentWidth / 2), mPaint);
+                drawingStrokes.mLastWidth = currentWidth;
+                drawingStrokes.mLastX = x;
+                drawingStrokes.mLastY = y;
+                drawingStrokes.isDown = false;
+            } else {
+//                float width = currentWidth / 2;
+//                while (width < currentWidth) {
+//                    canvas.drawLine(drawingStrokes.mLastX + width, drawingStrokes.mLastY - width , x + width, y - width, blurryPaint);
+//                    width += 0.5f;
+//                }
+                LinearGradient linearGradient = new LinearGradient(x - currentWidth / 2, y - currentWidth / 2, x + currentWidth / 2, y + currentWidth / 2, colors, null, Shader.TileMode.REPEAT);
+//                RadialGradient radialGradient = new RadialGradient(x, y, currentWidth / 2, colors[1], colors[0], Shader.TileMode.MIRROR);
+                blurryPaint.setShader(linearGradient);
+                //mPaint.setAlpha(0);
+                float k;
+                if( x != drawingStrokes.mLastX) {
+                    k = Math.abs((drawingStrokes.mLastY - y) / (drawingStrokes.mLastX - x));
+                    Log.d("123","myk: " + k);
+                    if(k < 0.005) {
+                        canvas.drawLine(x , y - currentWidth, x , y - currentWidth / 4, blurryPaint);
+                    } else if(k < 0.05) {
+                        canvas.drawLine(x , y - currentWidth * 15 / 16, x , y - currentWidth / 4, blurryPaint);
+                    } else if( k  < 0.1) {
+                        canvas.drawLine(x , y - currentWidth * 14 / 16, x , y - currentWidth / 4, blurryPaint);
+                    } else if(k < 0.3) {
+                        canvas.drawLine(x , y - currentWidth * 13 / 16, x , y - currentWidth / 4, blurryPaint);
+                    } else if(k < 0.5) {
+                        canvas.drawLine(x , y - currentWidth * 3 / 4, x , y - currentWidth / 4, blurryPaint);
+                    } else if(k > 100) {
+                        canvas.drawLine(x + currentWidth, y , x + currentWidth / 4, y, blurryPaint);
+                    } else if(k > 50) {
+                        canvas.drawLine(x + currentWidth * 15 / 16, y , x + currentWidth / 4, y, blurryPaint);
+                    } else if(k > 20) {
+                        canvas.drawLine(x + currentWidth * 14 / 16, y , x + currentWidth / 4, y, blurryPaint);
+                    } else if(k > 10) {
+                        canvas.drawLine(x + currentWidth * 13 / 16, y , x + currentWidth / 4, y, blurryPaint);
+                    } else if(k > 5) {
+                        canvas.drawLine(x + currentWidth * 3 / 4, y , x + currentWidth / 4, y, blurryPaint);
+                    } else {
+                        k = (drawingStrokes.mLastY - y) / (drawingStrokes.mLastX - x);
+                        //根据斜率计算另一点
+                        TimePoint myPointC = new TimePoint( (currentWidth * 11 / 16 )* (-k) / (float) Math.sqrt(k * k + 1) + x,
+                                (currentWidth * 11 / 16 ) / (float) Math.sqrt(k * k + 1) + y);
+                        TimePoint myPointD = new TimePoint( (-currentWidth * 11 / 16 )* (-k) / (float) Math.sqrt(k * k + 1) + x,
+                                (-currentWidth * 11 / 16 ) / (float) Math.sqrt(k * k + 1) + y);
+                        canvas.drawLine(myPointC.x, myPointC.y, x, y, blurryPaint);
+                        canvas.drawLine(myPointD.x, myPointD.y, x, y, blurryPaint);
+                    }
+                } else {
+                    canvas.drawLine(x , y - currentWidth, x , y - currentWidth / 4, blurryPaint);
+                }
+
+                //canvas.drawOval(new RectF(x + currentWidth , y - currentWidth , x , y ), blurryPaint);
+                //mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.XOR));
+                canvas.drawOval(new RectF(x - currentWidth / 2, y - currentWidth / 2, x + currentWidth / 2, y + currentWidth / 2), mPaint);
+                drawingStrokes.mLastWidth = currentWidth;
+                drawingStrokes.mLastX = x;
+                drawingStrokes.mLastY = y;
+            }
+        }
+    }
 }

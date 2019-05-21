@@ -16,11 +16,15 @@ public class StrokesView extends View{
     //笔划
     private Strokes strokes;
     private  DrawingStrokes mDrawing;
+    private PenType penType;
     public StrokesView(Context context, AttributeSet attributeSet){
         super(context,attributeSet);
         strokes = new Strokes();
         mDrawing = new DrawingStrokes(this, strokes);
-        mDrawing.setMaxWidth(4);//铅笔
+        mDrawing.setMaxWidth(2);//刚笔
+        penType = new PenType();
+        penType.setPenType(PenType.PEN);
+        mDrawing.setPenType(penType);
     }
     @Override
     protected void onDraw(Canvas canvas) {
@@ -64,6 +68,18 @@ public class StrokesView extends View{
 
     public void recover() {
         mDrawing.recover();
+    }
+
+    public void setPenType(int penType) {
+        this.penType.setPenType(penType);
+        switch (penType) {
+            case PenType.BRUSH:
+                mDrawing.setMaxWidth(8);//毛笔
+                break;
+            case PenType.PEN:
+                mDrawing.setMaxWidth(2);//刚笔
+                break;
+        }
     }
 
     public void onDestroy() {

@@ -62,6 +62,7 @@ public class DrawingStrokes {
     public float mLastWidth ;
     private float width, height;
     private float maxWidth;
+    private PenType penType;
     public DrawingStrokes(View strokeView, Strokes strokes){
         this.strokes = strokes;
         this.strokeView = strokeView;
@@ -78,7 +79,9 @@ public class DrawingStrokes {
             this.mPaint = mPaint;
         }
     }
-
+    public void setPenType(PenType penType) {
+        this.penType = penType;
+    }
     private void initBitmap(){
         if(myBitmap == null){
             myBitmap = Bitmap.createBitmap((int)width,(int)height, Bitmap.Config.ARGB_8888);
@@ -106,6 +109,9 @@ public class DrawingStrokes {
         Log.i(TAG, "maxWidth " + maxWidth);
     }
 
+    public float getMaxWidth() {
+        return maxWidth;
+    }
     public void addPoint(TimePoint timePoint,float pressure){
         mPoint.add(timePoint);
 
@@ -115,33 +121,59 @@ public class DrawingStrokes {
             float velocity = splineCurve.point3.velocityFrom(splineCurve.point2);
             float widthDelta = 0;
             float newWidth;
-            if (velocity > 3) {
-                splineCurve.steps = 4;
-                widthDelta = 0.8f;
-            } else if (velocity > 2) {
-                splineCurve.steps = 3;
-                widthDelta = 0.7f;
-            } else if (velocity > 1) {
-                splineCurve.steps = 3;
-                widthDelta = 0.6f;
-            } else if (velocity > 0.5) {
-                splineCurve.steps = 2;
-                widthDelta = 0.5f;
-            } else if (velocity > 0.2) {
-                splineCurve.steps = 2;
-                widthDelta = 0.4f;
-            } else if (velocity > 0.1) {
-                splineCurve.steps = 1;
-                widthDelta = 0.3f;
+            if (false) {
+                if (velocity > 3) {
+                    splineCurve.steps = 4;
+                    widthDelta = 0.8f;
+                } else if (velocity > 2) {
+                    splineCurve.steps = 3;
+                    widthDelta = 0.7f;
+                } else if (velocity > 1) {
+                    splineCurve.steps = 3;
+                    widthDelta = 0.6f;
+                } else if (velocity > 0.5) {
+                    splineCurve.steps = 2;
+                    widthDelta = 0.5f;
+                } else if (velocity > 0.2) {
+                    splineCurve.steps = 2;
+                    widthDelta = 0.4f;
+                } else if (velocity > 0.1) {
+                    splineCurve.steps = 1;
+                    widthDelta = 0.3f;
+                } else {
+                    splineCurve.steps = 1;
+                    widthDelta = 0.2f;
+                }
+                Log.i(TAG, "pressure: " + pressure);
+                if (pressure < 0.4)
+                    newWidth = strokeWidth(pressure, 1 - pressure);
+                else
+                    newWidth = strokeWidth(pressure, widthDelta);
             } else {
-                splineCurve.steps = 1;
-                widthDelta = 0.2f;
+                if (velocity > 3) {
+                    splineCurve.steps = 4;
+                    widthDelta = 3.0f;
+                } else if (velocity > 2) {
+                    splineCurve.steps = 3;
+                    widthDelta = 2.0f;
+                } else if (velocity > 1) {
+                    splineCurve.steps = 3;
+                    widthDelta = 1.0f;
+                } else if (velocity > 0.5) {
+                    splineCurve.steps = 2;
+                    widthDelta = 0.8f;
+                } else if (velocity > 0.2) {
+                    splineCurve.steps = 2;
+                    widthDelta = 0.6f;
+                } else if (velocity > 0.1) {
+                    splineCurve.steps = 1;
+                    widthDelta = 0.3f;
+                } else {
+                    splineCurve.steps = 1;
+                    widthDelta = 0.2f;
+                }
+                newWidth = strokeWidth(pressure, widthDelta) ;
             }
-            Log.i(TAG, "pressure: " + pressure);
-            if(pressure < 0.4)
-                newWidth = strokeWidth(pressure,1 - pressure) ;
-            else
-                newWidth = strokeWidth(pressure,widthDelta) ;
             newWidth = Float.isNaN(newWidth) ? mLastWidth : newWidth;
             Log.i(TAG, "newWidth" + newWidth);
             if(strokes.getMyPathSize() >= 1) {
@@ -158,7 +190,15 @@ public class DrawingStrokes {
             } else {
                 splineCurveStrategy.updateData(mLastWidth, newWidth, splineCurve);
             }
-            splineCurveStrategy.drawPen(this);//钢笔
+            Log.i("penType", penType.getPenType() + "");
+            switch (penType.getPenType()) {
+                case PenType.PEN:
+                    splineCurveStrategy.drawPen(this);//钢笔
+                    break;
+                case PenType.BRUSH:
+                    splineCurveStrategy.drawBrushPen(this);//毛笔
+                    break;
+            }
             mPoint.remove(0);
         }
     }
