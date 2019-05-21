@@ -3,4 +3,6 @@
 
 效果图展示如下：
 
-![image](https://github.com/doubledouble123/Pens/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE/show.png)
+![image](https://github.com/doubledouble123/Pens/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE/show_pen.png)
+
+![image](https://github.com/doubledouble123/Pens/blob/master/%E6%95%88%E6%9E%9C%E5%9B%BE/show_bursh.png)
